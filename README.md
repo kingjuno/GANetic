@@ -13,7 +13,7 @@ A collection of GANs implemented in PyTorch.
 ```python
 import torch
 
-from gan_zoo.dcgan import Discriminator, Generator
+from ganetic.dcgan import Discriminator, Generator
 
 netG = Generator(
     nz=100,  # length of latent vector
@@ -34,7 +34,7 @@ prediction = netD(fake_img)
 ```python
 import torch
 
-from gan_zoo.srgan import Generator, Discriminator
+from ganetic.srgan import Generator, Discriminator
 
 img = torch.randn(1, 3, 64, 64)
 gen = Generator(
