@@ -1,4 +1,4 @@
-# GAN-Zoo
+# GANetic
 A collection of GANs implemented in PyTorch.
 
 ## Table of Contents

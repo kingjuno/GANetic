@@ -1,20 +1,27 @@
-from setuptools import setup, find_packages
+import io
+
+from setuptools import find_packages, setup
+
+with io.open('README.md', 'r', encoding='utf-8') as f:
+    long_description = '\n' + f.read()
 
 setup(
-    name='GAN-Zoo',
+    name='GANetic',
     packages=find_packages(exclude=['docs', 'tests*', 'examples']),
-    version='0.1.0',
+    version='0.0.1',
     license='MIT',
     description='A Collection of GANs - PyTorch',
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     author='Geo Jolly',
     author_email='geojollyc@gmail.com',
-    url='https://github.com/kingjuno/GAN-Zoo',
+    url='https://github.com/kingjuno/GANetic',
     keywords=[
         'GAN',
         'Generative Adversarial Networks',
         'Deep Learning',
-        'PyTorch', 
-        'GAN-Zoo'
+        'PyTorch',
+        'GANetic'
     ],
     install_requires=[
         'torch>=1.13.0',
