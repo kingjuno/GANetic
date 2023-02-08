@@ -1,8 +1,9 @@
 from torch import nn
 
+
 class Generator(nn.Module):
     def __init__(
-        self, 
+        self,
         ngpu,
         nz,
         ngf,
@@ -11,7 +12,7 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
         self.ngpu = ngpu
         self.block1 = nn.Sequential(
-            nn.ConvTranspose2d( nz, ngf * 8, 4, 1, 0, bias=False),
+            nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
             nn.BatchNorm2d(ngf * 8),
             nn.ReLU(True)
         )
@@ -21,17 +22,17 @@ class Generator(nn.Module):
             nn.ReLU(True),
         )
         self.block3 = nn.Sequential(
-            nn.ConvTranspose2d( ngf * 4, ngf * 2, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf * 2),
             nn.ReLU(True),
         )
         self.block4 = nn.Sequential(
-            nn.ConvTranspose2d( ngf * 2, ngf, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf),
             nn.ReLU(True),
         )
         self.block5 = nn.Sequential(
-            nn.ConvTranspose2d( ngf, nc, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
             nn.Tanh()
         )
 
@@ -43,9 +44,10 @@ class Generator(nn.Module):
         x = self.block5(x)
         return x
 
+
 class Discriminator(nn.Module):
     def __init__(
-        self, 
+        self,
         ngpu,
         nc,
         ndf
