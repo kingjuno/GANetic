@@ -1,6 +1,7 @@
-from torch import nn
 import math
+
 import torch
+from torch import nn
 
 
 class ResidualBlock(nn.Module):
@@ -38,18 +39,34 @@ class UpsampleBLock(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self,
-                 scale_factor,
-                 nz=3,
-                 nc=3,
-                 ngf=64,
-                 no_of_residual_blocks=5
-                 ):
+    r"""
+    Parameters
+    ----------
+    scale_factor : int
+        The scale factor for the super resolution.
+    nci : int
+        The number of channels in the input tensor.
+    nco : int
+        The number of channels in the output tensor.
+    ngf : int, default=64
+        The number of filters in the generator.
+    no_of_residual_blocks : int, default=5
+        The number of residual blocks in the generator.
+    """
+
+    def __init__(
+        self,
+        scale_factor,
+        nci=3,
+        nco=3,
+        ngf=64,
+        no_of_residual_blocks=5
+    ):
         super(Generator, self).__init__()
         upsample_block_num = int(math.log(scale_factor, 2))
 
         self.block1 = nn.Sequential(
-            nn.Conv2d(nz, ngf, kernel_size=9, padding=4),
+            nn.Conv2d(nci, ngf, kernel_size=9, padding=4),
             nn.PReLU()
         )
         block2 = [ResidualBlock(ngf)
@@ -61,7 +78,7 @@ class Generator(nn.Module):
         )
         block4 = [UpsampleBLock(ngf, 2)
                   for _ in range(upsample_block_num)]
-        block4.append(nn.Conv2d(ngf, nc, kernel_size=9, padding=4))
+        block4.append(nn.Conv2d(ngf, nco, kernel_size=9, padding=4))
         self.block4 = nn.Sequential(*block4)
 
     def forward(self, x):
@@ -74,11 +91,22 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
+    r"""
+    Parameters
+    ----------
+    input_shape : tuple
+        The shape of the input tensor.
+    ndf : int, default=64
+        The number of filters in the discriminator.
+    negative_slope : float, default=0.2
+        The negative slope of the leaky relu.
+    """
+
     def __init__(
-            self,
-            input_shape,
-            ndf=64,
-            negative_slope=0.2,
+        self,
+        input_shape,
+        ndf=64,
+        negative_slope=0.2,
     ):
         super(Discriminator, self).__init__()
         self.block1 = nn.Sequential(

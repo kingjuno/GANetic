@@ -2,15 +2,24 @@ from torch import nn
 
 
 class Generator(nn.Module):
+    r"""
+    Parameters
+    ----------
+    nz : int 
+        Size of the latent z vector.
+    nc : int
+        Number of channels in the training images.
+    ngf: int, default 64
+        Size of feature maps in generator. 
+    """
+
     def __init__(
         self,
-        ngpu,
         nz,
-        ngf,
-        nc
+        nc,
+        ngf=64,
     ):
         super(Generator, self).__init__()
-        self.ngpu = ngpu
         self.block1 = nn.Sequential(
             nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
             nn.BatchNorm2d(ngf * 8),
@@ -46,14 +55,21 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
+    r"""
+    Parameters
+    ----------
+    nc : int
+        Number of channels in the training images.
+    ndf: int, default 64
+        Size of feature maps in discriminator. 
+    """
+
     def __init__(
         self,
-        ngpu,
         nc,
-        ndf
+        ndf=64
     ):
         super(Discriminator, self).__init__()
-        self.ngpu = ngpu
         self.block1 = nn.Sequential(
             nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
