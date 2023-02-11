@@ -1,15 +1,25 @@
 # GANetic
+
 A collection of GANs implemented in PyTorch.
 
 ## Table of Contents
-<!-- - [Installation](#installation) -->
+
+- [Installation](#installation)
 - [Usage](#usage)
-    - [DCGAN](#dcgan)
-    - [SRGAN](#srgan)
+  - [DCGAN](#dcgan)
+  - [SRGAN](#srgan)
 - [Citations](#citations)
 
+## Installation
+
+```bash
+pip install ganetic
+```
+
 ## Usage
+
 ### DCGAN
+
 ```python
 import torch
 
@@ -31,6 +41,7 @@ prediction = netD(fake_img)
 ```
 
 ### SRGAN
+
 ```python
 import torch
 
@@ -42,7 +53,7 @@ gen = Generator(
     nci=3,          # number of channels in input image
     nco=3,          # number of channels in output image
     ngf=64,         # number of filters in the generator
-    no_of_residual_blocks=5 
+    no_of_residual_blocks=5
 )
 disc = Discriminator(
     input_shape=(3, 256, 256),
@@ -54,7 +65,31 @@ HR_img = gen(img)
 pred = disc(HR_img)
 ```
 
+### Pix2Pix
+
+```python
+import torch
+
+from ganetic.pix2pix import Discriminator, Generator
+
+img = torch.randn(1, 3, 256, 256)
+gen = Generator(
+    nci=3,
+    nco=3,
+    ngf=64
+)
+
+disc = Discriminator(
+    nci=3,
+    ndf=64
+)
+
+fake = gen(img)
+pred = disc(img, fake)
+```
+
 ## Citations
+
 ```bibtex
 @article{radford2015unsupervised,
   title={Unsupervised representation learning with deep convolutional generative adversarial networks},
@@ -70,6 +105,16 @@ pred = disc(HR_img)
   author={Ledig, Christian and Theis, Lucas and Husz{\'a}r, Ferenc and Caballero, Jose and Cunningham, Andrew and Acosta, Alejandro and Aitken, Andrew and Tejani, Alykhan and Totz, Johannes and Wang, Zehan and others},
   booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
   pages={4681--4690},
+  year={2017}
+}
+```
+
+```bibtex
+@inproceedings{isola2017image,
+  title={Image-to-image translation with conditional adversarial networks},
+  author={Isola, Phillip and Zhu, Jun-Yan and Zhou, Tinghui and Efros, Alexei A},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={1125--1134},
   year={2017}
 }
 ```

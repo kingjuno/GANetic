@@ -8,7 +8,7 @@ with io.open('README.md', 'r', encoding='utf-8') as f:
 setup(
     name='GANetic',
     packages=find_packages(exclude=['docs', 'tests*', 'examples']),
-    version='0.0.3',
+    version='0.0.4',
     license='MIT',
     description='A Collection of GANs - PyTorch',
     long_description=open('README.md').read(),
@@ -21,7 +21,8 @@ setup(
         'Generative Adversarial Networks',
         'Deep Learning',
         'PyTorch',
-        'GANetic'
+        'GANetic',
+        'Generative Artificial Intelligence',
     ],
     install_requires=[
         'torch>=1.10',
