@@ -1,7 +1,8 @@
 import math
+
 from torch import nn
+
 import ganetic.basemodel as basemodel
-import torch
 
 
 class Generator(basemodel.Generator):
@@ -11,11 +12,11 @@ class Generator(basemodel.Generator):
     nz : int, default 100
         Size of the latent z vector.
     nc : int, default 3
-        Number of channels in the output images.
+        Number of channels in the output image.
     ngf: int, default 64
         Size of feature maps in generator. 
     out_size: int, default 64
-        Size of the output images.
+        Size of the output image.
     activation: str, default 'relu'
         Activation function to use in the generator.
     last_activation: str, default 'tanh'
@@ -66,7 +67,7 @@ class Generator(basemodel.Generator):
         self._weights_init(self.model)
 
     def forward(self, x):
-        return self.model(x.view(x.size(0), self.nz, 1, 1))
+        return self.model(x.view(x.size(0), x.size(1), 1, 1))
 
 
 class Discriminator(basemodel.Discriminator):
@@ -74,11 +75,11 @@ class Discriminator(basemodel.Discriminator):
     Parameters
     ----------
     nc : int, default 3
-        Number of channels in the input images.
+        Number of channels in the input image.
     ndf: int, default 64
         Size of feature maps in discriminator. 
     in_size: int, default 64
-        Size of the input images.
+        Size of the input image.
     activation: str, default 'LeakyReLU'
         Activation function to use in the discriminator.
     last_activation: str, default 'sigmoid'

@@ -1,6 +1,11 @@
 import torch
 from torch import nn
 
+# TODO[#1]: Make Generator and Discriminator
+# classes inherit from a base class
+# TODO[#2]: Remove normal_init function and use
+# the one in basemodel.py
+
 
 def normal_init(m, mean, std):
     if isinstance(m, nn.ConvTranspose2d) or isinstance(m, nn.Conv2d):
