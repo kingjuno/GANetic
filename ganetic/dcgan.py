@@ -1,103 +1,130 @@
+import math
 from torch import nn
+import ganetic.basemodel as basemodel
+import torch
 
 
-class Generator(nn.Module):
-    r"""
+class Generator(basemodel.Generator):
+    r"""Deep Convolutional Generative Adversarial Network (DCGAN) Generator.
     Parameters
     ----------
-    nz : int 
+    nz : int, default 100
         Size of the latent z vector.
-    nc : int
-        Number of channels in the training images.
+    nc : int, default 3
+        Number of channels in the output images.
     ngf: int, default 64
         Size of feature maps in generator. 
+    out_size: int, default 64
+        Size of the output images.
+    activation: str, default 'relu'
+        Activation function to use in the generator.
+    last_activation: str, default 'tanh'
+        Activation function to use in the last layer of the generator.
     """
 
     def __init__(
         self,
-        nz,
-        nc,
+        nz=100,
+        nc=3,
         ngf=64,
+        out_size=64,
+        activation='relu',
+        last_activation='tanh'
     ):
-        super(Generator, self).__init__()
-        self.block1 = nn.Sequential(
-            nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
-            nn.BatchNorm2d(ngf * 8),
-            nn.ReLU(True)
-        )
-        self.block2 = nn.Sequential(
-            nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ngf * 4),
-            nn.ReLU(True),
-        )
-        self.block3 = nn.Sequential(
-            nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ngf * 2),
-            nn.ReLU(True),
-        )
-        self.block4 = nn.Sequential(
-            nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ngf),
-            nn.ReLU(True),
-        )
-        self.block5 = nn.Sequential(
-            nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
-            nn.Tanh()
-        )
+        super(Generator, self).__init__(nz, nc)
+        if out_size < 16 and math.ceil(math.log2(out_size)) != math.floor(math.log2(out_size)):
+            raise Exception(
+                "out_size must be a power of 2 and greater than 16")
+        total_repeats = out_size.bit_length() - 4
+        model = []
+        _ngf = ngf * 2 ** total_repeats
+        activation = nn.ReLU(True)
+        last_activation = nn.Tanh()
+        model += [
+            nn.Sequential(
+                nn.ConvTranspose2d(nz, _ngf, 4, 1, 0, bias=False),
+                nn.BatchNorm2d(_ngf),
+                activation
+            )
+        ]
+        for _ in range(total_repeats):
+            _ngf //= 2
+            model += [
+                nn.Sequential(
+                    nn.ConvTranspose2d(_ngf * 2, _ngf, 4, 2, 1, bias=False),
+                    nn.BatchNorm2d(_ngf),
+                    activation
+                )
+            ]
+        model += [
+            nn.Sequential(
+                nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
+                last_activation
+            )
+        ]
+        self.model = nn.Sequential(*model)
+        self._weights_init(self.model)
 
     def forward(self, x):
-        x = self.block1(x)
-        x = self.block2(x)
-        x = self.block3(x)
-        x = self.block4(x)
-        x = self.block5(x)
-        return x
+        return self.model(x.view(x.size(0), self.nz, 1, 1))
 
 
-class Discriminator(nn.Module):
-    r"""
+class Discriminator(basemodel.Discriminator):
+    r"""Deep Convolutional Generative Adversarial Network (DCGAN) Discriminator.
     Parameters
     ----------
-    nc : int
-        Number of channels in the training images.
+    nc : int, default 3
+        Number of channels in the input images.
     ndf: int, default 64
         Size of feature maps in discriminator. 
+    in_size: int, default 64
+        Size of the input images.
+    activation: str, default 'LeakyReLU'
+        Activation function to use in the discriminator.
+    last_activation: str, default 'sigmoid'
+        Activation function to use in the last layer of the discriminator.    
     """
 
     def __init__(
         self,
-        nc,
-        ndf=64
+        nc=3,
+        ndf=64,
+        in_size=64,
+        activation='LeakyReLU',
+        last_activation='sigmoid'
     ):
-        super(Discriminator, self).__init__()
-        self.block1 = nn.Sequential(
-            nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
-            nn.LeakyReLU(0.2, inplace=True),
-        )
-        self.block2 = nn.Sequential(
-            nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 2),
-            nn.LeakyReLU(0.2, inplace=True),
-        )
-        self.block3 = nn.Sequential(
-            nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 4),
-            nn.LeakyReLU(0.2, inplace=True),
-        )
-        self.block4 = nn.Sequential(
-            nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 8),
-            nn.LeakyReLU(0.2, inplace=True),
-        )
-        self.block5 = nn.Sequential(
-            nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
-            nn.Sigmoid()
-        )
+        super(Discriminator, self).__init__(nc)
+        if in_size < 16 and math.ceil(math.log2(in_size)) != math.floor(math.log2(in_size)):
+            raise Exception(
+                "in_size must be a power of 2 and greater than 16")
+        total_repeats = in_size.bit_length() - 4
+        model = []
+        _ndf = ndf
+        activation = nn.LeakyReLU(0.2, inplace=True)
+        last_activation = nn.Sigmoid()
+        model += [
+            nn.Sequential(
+                nn.Conv2d(nc, _ndf, 4, 2, 1, bias=False),
+                activation
+            )
+        ]
+        for _ in range(total_repeats):
+            model += [
+                nn.Sequential(
+                    nn.Conv2d(_ndf, _ndf * 2, 4, 2, 1, bias=False),
+                    nn.BatchNorm2d(_ndf * 2),
+                    activation
+                )
+            ]
+            _ndf *= 2
+        model += [
+            nn.Sequential(
+                nn.Conv2d(_ndf, 1, 4, 1, 0, bias=False),
+                last_activation
+            )
+        ]
+        self.model = nn.Sequential(*model)
+        self._weights_init(self.model)
 
     def forward(self, x):
-        x = self.block1(x)
-        x = self.block2(x)
-        x = self.block3(x)
-        x = self.block4(x)
-        x = self.block5(x)
-        return x
+        return self.model(x).view(-1, 1).squeeze(1)
