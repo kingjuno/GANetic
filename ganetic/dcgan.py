@@ -14,7 +14,7 @@ class Generator(basemodel.Generator):
     nc : int, default 3
         Number of channels in the output image.
     ngf: int, default 64
-        Size of feature maps in generator. 
+        Size of feature maps in generator.
     out_size: int, default 64
         Size of the output image.
     activation: torch.nn.Module, default nn.ReLU(True)
@@ -30,20 +30,21 @@ class Generator(basemodel.Generator):
         ngf=64,
         out_size=64,
         activation=nn.ReLU(True),
-        last_activation=nn.Tanh()
+        last_activation=nn.Tanh(),
     ):
         super(Generator, self).__init__()
-        if out_size < 16 and math.ceil(math.log2(out_size)) != math.floor(math.log2(out_size)):
-            raise Exception(
-                "out_size must be a power of 2 and greater than 16")
+        if out_size < 16 and math.ceil(math.log2(out_size)) != math.floor(
+            math.log2(out_size)
+        ):
+            raise Exception("out_size must be a power of 2 and greater than 16")
         total_repeats = out_size.bit_length() - 4
         model = []
-        _ngf = ngf * 2 ** total_repeats
+        _ngf = ngf * 2**total_repeats
         model += [
             nn.Sequential(
                 nn.ConvTranspose2d(nz, _ngf, 4, 1, 0, bias=False),
                 nn.BatchNorm2d(_ngf),
-                activation
+                activation,
             )
         ]
         for _ in range(total_repeats):
@@ -52,13 +53,12 @@ class Generator(basemodel.Generator):
                 nn.Sequential(
                     nn.ConvTranspose2d(_ngf * 2, _ngf, 4, 2, 1, bias=False),
                     nn.BatchNorm2d(_ngf),
-                    activation
+                    activation,
                 )
             ]
         model += [
             nn.Sequential(
-                nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
-                last_activation
+                nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False), last_activation
             )
         ]
         self.model = nn.Sequential(*model)
@@ -75,13 +75,13 @@ class Discriminator(basemodel.Discriminator):
     nc : int, default 3
         Number of channels in the input image.
     ndf: int, default 64
-        Size of feature maps in discriminator. 
+        Size of feature maps in discriminator.
     in_size: int, default 64
         Size of the input image.
     activation: torch.nn.Module, default nn.LeakyReLU(0.2, inplace=True)
         Activation function to use in the discriminator.
     last_activation: torch.nn.Module, default nn.Sigmoid()
-        Activation function to use in the last layer of the discriminator.   
+        Activation function to use in the last layer of the discriminator.
     """
 
     def __init__(
@@ -90,35 +90,28 @@ class Discriminator(basemodel.Discriminator):
         ndf=64,
         in_size=64,
         activation=nn.LeakyReLU(0.2, inplace=True),
-        last_activation=nn.Sigmoid()
+        last_activation=nn.Sigmoid(),
     ):
         super(Discriminator, self).__init__()
-        if in_size < 16 and math.ceil(math.log2(in_size)) != math.floor(math.log2(in_size)):
-            raise Exception(
-                "in_size must be a power of 2 and greater than 16")
+        if in_size < 16 and math.ceil(math.log2(in_size)) != math.floor(
+            math.log2(in_size)
+        ):
+            raise Exception("in_size must be a power of 2 and greater than 16")
         total_repeats = in_size.bit_length() - 4
         model = []
         _ndf = ndf
-        model += [
-            nn.Sequential(
-                nn.Conv2d(nc, _ndf, 4, 2, 1, bias=False),
-                activation
-            )
-        ]
+        model += [nn.Sequential(nn.Conv2d(nc, _ndf, 4, 2, 1, bias=False), activation)]
         for _ in range(total_repeats):
             model += [
                 nn.Sequential(
                     nn.Conv2d(_ndf, _ndf * 2, 4, 2, 1, bias=False),
                     nn.BatchNorm2d(_ndf * 2),
-                    activation
+                    activation,
                 )
             ]
             _ndf *= 2
         model += [
-            nn.Sequential(
-                nn.Conv2d(_ndf, 1, 4, 1, 0, bias=False),
-                last_activation
-            )
+            nn.Sequential(nn.Conv2d(_ndf, 1, 4, 1, 0, bias=False), last_activation)
         ]
         self.model = nn.Sequential(*model)
         self._weights_init(self.model)

@@ -81,7 +81,7 @@ class DeConvBlock(torch.nn.Module):
         The size of the convolutional kernel.
     stride : int, default=2
         The stride of the convolution.
-    padding : int, default=1    
+    padding : int, default=1
         The padding of the convolution.
     batch_norm : bool, default=True
         Whether to use a batch normalization layer.
@@ -167,12 +167,9 @@ class Generator(torch.nn.Module):
         self.deconv3 = DeConvBlock(
             in_channels=ngf * 8 * 2, out_channels=ngf * 8, dropout=True
         )
-        self.deconv4 = DeConvBlock(
-            in_channels=ngf * 8 * 2, out_channels=ngf * 8)
-        self.deconv5 = DeConvBlock(
-            in_channels=ngf * 8 * 2, out_channels=ngf * 4)
-        self.deconv6 = DeConvBlock(
-            in_channels=ngf * 4 * 2, out_channels=ngf * 2)
+        self.deconv4 = DeConvBlock(in_channels=ngf * 8 * 2, out_channels=ngf * 8)
+        self.deconv5 = DeConvBlock(in_channels=ngf * 8 * 2, out_channels=ngf * 4)
+        self.deconv6 = DeConvBlock(in_channels=ngf * 4 * 2, out_channels=ngf * 2)
         self.deconv7 = DeConvBlock(in_channels=ngf * 2 * 2, out_channels=ngf)
         self.deconv8 = DeConvBlock(
             in_channels=ngf * 2, out_channels=nco, batch_norm=False
@@ -226,14 +223,10 @@ class Discriminator(torch.nn.Module):
     def __init__(self, nci, ndf=64):
         super(Discriminator, self).__init__()
         self.conv1 = ConvBlock(
-            in_channels=nci*2, out_channels=ndf, activation=False, batch_norm=False
+            in_channels=nci * 2, out_channels=ndf, activation=False, batch_norm=False
         )
-        self.conv2 = ConvBlock(
-            in_channels=ndf, out_channels=ndf * 2
-        )
-        self.conv3 = ConvBlock(
-            in_channels=ndf * 2, out_channels=ndf * 4
-        )
+        self.conv2 = ConvBlock(in_channels=ndf, out_channels=ndf * 2)
+        self.conv3 = ConvBlock(in_channels=ndf * 2, out_channels=ndf * 4)
         self.conv4 = ConvBlock(
             in_channels=ndf * 4, out_channels=ndf * 8, stride=1, padding=1
         )
