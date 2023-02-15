@@ -10,16 +10,19 @@ A collection of highly customizable GANs implemented in PyTorch.
   - [SRGAN](#srgan)
   - [Pix2Pix](#pix2pix)
   - [Conditional GANs](#conditional-gans)
+  - [CycleGAN](#cyclegan)
 - [Citations](#citations)
 
 ## Installation
 
 Stable version:
+
 ```bash
 pip install ganetic
 ```
 
 Latest version:
+
 ```bash
 pip install git+https://github.com/kingjuno/ganetic.git
 ```
@@ -95,6 +98,7 @@ disc = Discriminator(
 fake = gen(img)
 pred = disc(img, fake)
 ```
+
 ### Conditional GANs
 
 ```python
@@ -125,6 +129,34 @@ label = torch.LongTensor(64).random_(0, 10)
 
 print(gen(z, label).shape)
 print(disc(gen(z, label), label).shape)
+```
+
+### CycleGAN
+
+```python
+import torch
+
+from ganetic.cyclegan import Discriminator, Generator
+
+img = torch.randn(1, 3, 128, 128)
+
+gen = Generator(
+    nci=3,
+    nco=3,
+    ngf=64,
+    no_of_residual_blocks=9,
+    activation=torch.nn.ReLU(True),
+    last_activation=torch.nn.Tanh(),
+)
+print(gen(img).shape)
+disc = Discriminator(
+    nci=3,
+    ndf=64,
+    no_of_layers=3,
+    activation=torch.nn.ReLU(True),
+    last_activation=torch.nn.Sigmoid(),
+)
+print(disc(img).shape)
 ```
 
 ## Citations
@@ -164,5 +196,15 @@ print(disc(gen(z, label), label).shape)
   author={Mirza, Mehdi and Osindero, Simon},
   journal={arXiv preprint arXiv:1411.1784},
   year={2014}
+}
+```
+
+```bibtex
+@inproceedings{zhu2017unpaired,
+  title={Unpaired image-to-image translation using cycle-consistent adversarial networks},
+  author={Zhu, Jun-Yan and Park, Taesung and Isola, Phillip and Efros, Alexei A},
+  booktitle={Proceedings of the IEEE international conference on computer vision},
+  pages={2223--2232},
+  year={2017}
 }
 ```
