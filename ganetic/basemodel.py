@@ -4,18 +4,10 @@ from torch import nn
 class Generator(nn.Module):
     r"""
     Base class for all Generators.
-    Parameters
-    ----------
-    nz : int, default 100
-        Size of the latent z vector.
-    nc : int, default 3
-        Number of channels in the training images.
     """
 
-    def __init__(self, nz=100, nc=3):
+    def __init__(self):
         super(Generator, self).__init__()
-        self.nz = nz
-        self.nc = nc
 
     def _weights_init(self, m):
         r"""
@@ -32,15 +24,10 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     r"""
     Base class for all Discriminators.
-    Parameters
-    ----------
-    nc : int, default 3
-        Number of channels in the training images.
     """
 
-    def __init__(self, nc=3):
+    def __init__(self):
         super(Discriminator, self).__init__()
-        self.nc = nc
 
     def _weights_init(self, m):
         r"""

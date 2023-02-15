@@ -18,9 +18,9 @@ class Generator(DCGANGenerator):
         Size of feature maps in generator. 
     out_size: int, default 64
         Size of the output image.
-    activation: str, default 'relu'
+    activation: torch.nn.Module, default nn.ReLU(True)
         Activation function to use in the generator.
-    last_activation: str, default 'tanh'
+    last_activation: torch.nn.Module, default nn.Tanh()
         Activation function to use in the last layer of the generator.
     """
 
@@ -31,8 +31,8 @@ class Generator(DCGANGenerator):
         nc=3,
         ngf=64,
         out_size=64,
-        activation='relu',
-        last_activation='tanh'
+        activation=nn.ReLU(True),
+        last_activation=nn.Tanh()
     ):
         super(Generator, self).__init__(
             nz + n_classes,
@@ -65,10 +65,10 @@ class Discriminator(DCGANDiscriminator):
         Size of feature maps in discriminator.
     in_size: int, default 64
         Size of the input image.
-    activation: str, default 'LeakyReLU'
+    activation: torch.nn.Module, default nn.LeakyReLU(0.2, inplace=True)
         Activation function to use in the discriminator.
-    last_activation: str, default 'sigmoid'
-        Activation function to use in the last layer of the discriminator.    
+    last_activation: torch.nn.Module, default nn.Sigmoid()
+        Activation function to use in the last layer of the discriminator.   
     """
 
     def __init__(
@@ -77,8 +77,8 @@ class Discriminator(DCGANDiscriminator):
         nc=3,
         ndf=64,
         in_size=64,
-        activation='LeakyReLU',
-        last_activation='sigmoid'
+        activation=nn.LeakyReLU(0.2, inplace=True),
+        last_activation=nn.Sigmoid()
     ):
         super(Discriminator, self).__init__(
             nc + n_classes,

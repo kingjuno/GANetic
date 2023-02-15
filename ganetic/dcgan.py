@@ -17,9 +17,9 @@ class Generator(basemodel.Generator):
         Size of feature maps in generator. 
     out_size: int, default 64
         Size of the output image.
-    activation: str, default 'relu'
+    activation: torch.nn.Module, default nn.ReLU(True)
         Activation function to use in the generator.
-    last_activation: str, default 'tanh'
+    last_activation: torch.nn.Module, default nn.Tanh()
         Activation function to use in the last layer of the generator.
     """
 
@@ -29,18 +29,16 @@ class Generator(basemodel.Generator):
         nc=3,
         ngf=64,
         out_size=64,
-        activation='relu',
-        last_activation='tanh'
+        activation=nn.ReLU(True),
+        last_activation=nn.Tanh()
     ):
-        super(Generator, self).__init__(nz, nc)
+        super(Generator, self).__init__()
         if out_size < 16 and math.ceil(math.log2(out_size)) != math.floor(math.log2(out_size)):
             raise Exception(
                 "out_size must be a power of 2 and greater than 16")
         total_repeats = out_size.bit_length() - 4
         model = []
         _ngf = ngf * 2 ** total_repeats
-        activation = nn.ReLU(True)
-        last_activation = nn.Tanh()
         model += [
             nn.Sequential(
                 nn.ConvTranspose2d(nz, _ngf, 4, 1, 0, bias=False),
@@ -80,10 +78,10 @@ class Discriminator(basemodel.Discriminator):
         Size of feature maps in discriminator. 
     in_size: int, default 64
         Size of the input image.
-    activation: str, default 'LeakyReLU'
+    activation: torch.nn.Module, default nn.LeakyReLU(0.2, inplace=True)
         Activation function to use in the discriminator.
-    last_activation: str, default 'sigmoid'
-        Activation function to use in the last layer of the discriminator.    
+    last_activation: torch.nn.Module, default nn.Sigmoid()
+        Activation function to use in the last layer of the discriminator.   
     """
 
     def __init__(
@@ -91,18 +89,16 @@ class Discriminator(basemodel.Discriminator):
         nc=3,
         ndf=64,
         in_size=64,
-        activation='LeakyReLU',
-        last_activation='sigmoid'
+        activation=nn.LeakyReLU(0.2, inplace=True),
+        last_activation=nn.Sigmoid()
     ):
-        super(Discriminator, self).__init__(nc)
+        super(Discriminator, self).__init__()
         if in_size < 16 and math.ceil(math.log2(in_size)) != math.floor(math.log2(in_size)):
             raise Exception(
                 "in_size must be a power of 2 and greater than 16")
         total_repeats = in_size.bit_length() - 4
         model = []
         _ndf = ndf
-        activation = nn.LeakyReLU(0.2, inplace=True)
-        last_activation = nn.Sigmoid()
         model += [
             nn.Sequential(
                 nn.Conv2d(nc, _ndf, 4, 2, 1, bias=False),
