@@ -5,7 +5,7 @@ from torch import nn
 
 import ganetic.basemodel as basemodel
 
-from .layers import ResidualBlock, UpsampleBlock
+from ganetic.layers import ResidualBlock, UpsampleBlock
 
 # TODO[#1]: Make Generator and Discriminator
 # classes inherit from a base class
@@ -23,18 +23,20 @@ class Generator(basemodel.Generator):
         The number of channels in the output tensor.
     ngf : int, default=64
         The number of filters in the generator.
-    no_of_residual_blocks : int, default=5
-        The number of residual blocks in the generator.
+    n_res : int, default=5
+        The number of residual ResidualBlock in the generator.
+    last_activation_fn : lambda, default=(nn.Tanh()+1)/2
     """
 
-    def __init__(self, scale_factor, nci=3, nco=3, ngf=64, no_of_residual_blocks=5):
+    def __init__(
+            self, scale_factor, nci=3, nco=3, ngf=64, n_res=5, last_activation_fn=lambda x: (torch.tanh(x) + 1) / 2):
         super(Generator, self).__init__()
         upsample_block_num = int(math.log(scale_factor, 2))
 
         self.block1 = nn.Sequential(
             nn.Conv2d(nci, ngf, kernel_size=9, padding=4), nn.PReLU()
         )
-        block2 = [ResidualBlock(ngf) for _ in range(no_of_residual_blocks)]
+        block2 = [ResidualBlock(ngf) for _ in range(n_res)]
         self.block2 = nn.Sequential(*block2)
         self.block3 = nn.Sequential(
             nn.Conv2d(ngf, ngf, kernel_size=3, padding=1), nn.BatchNorm2d(ngf)
@@ -42,6 +44,7 @@ class Generator(basemodel.Generator):
         block4 = [UpsampleBlock(ngf, 2) for _ in range(upsample_block_num)]
         block4.append(nn.Conv2d(ngf, nco, kernel_size=9, padding=4))
         self.block4 = nn.Sequential(*block4)
+        self.last_activation_fn = last_activation_fn
 
     def forward(self, x):
         x = self.block1(x)
@@ -49,7 +52,7 @@ class Generator(basemodel.Generator):
         block2 = self.block2(block2)
         block3 = self.block3(block2) + x
         block4 = self.block4(block3)
-        return (torch.tanh(block4) + 1) / 2
+        return self.last_activation_fn(block4)
 
 
 class Discriminator(basemodel.Discriminator):
@@ -119,7 +122,8 @@ class Discriminator(basemodel.Discriminator):
                                 self.block4(
                                     self.block3(
                                         self.block2(
-                                            self.block1(torch.zeros(1, *(input_shape)))
+                                            self.block1(torch.zeros(
+                                                1, *(input_shape)))
                                         )
                                     )
                                 )

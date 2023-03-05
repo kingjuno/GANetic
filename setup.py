@@ -8,7 +8,7 @@ with io.open("README.md", "r", encoding="utf-8") as f:
 setup(
     name="GANetic",
     packages=find_packages(exclude=["docs", "tests*", "examples"]),
-    version="0.0.6",
+    version="0.0.9",
     license="MIT",
     description="A Collection of GANs - PyTorch",
     long_description=open("README.md").read(),
