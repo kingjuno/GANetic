@@ -47,35 +47,36 @@ class Generator(basemodel.Generator):
         self.last_activation_fn = last_activation_fn
 
     def forward(self, x):
-        x = self.block1(x)
-        block2 = x
-        block2 = self.block2(block2)
-        block3 = self.block3(block2) + x
-        block4 = self.block4(block3)
-        return self.last_activation_fn(block4)
+        _x = self.block1(x)
+        x = self.block2(_x)
+        x = self.block3(x) + _x
+        x = self.block4(x)
+        return self.last_activation_fn(x)
 
 
 class Discriminator(basemodel.Discriminator):
     r"""
     Parameters
     ----------
-    input_shape : tuple
-        The shape of the input tensor.
+    nci : int, default=3
+        The number of channels in the input tensor.
     ndf : int, default=64
         The number of filters in the discriminator.
     negative_slope : float, default=0.2
         The negative slope of the leaky relu.
+    last_activation_fn : lambda, default=nn.Sigmoid()
     """
 
     def __init__(
         self,
-        input_shape,
+        nci=3,
         ndf=64,
         negative_slope=0.2,
+        last_activation_fn=nn.Sigmoid(),
     ):
         super(Discriminator, self).__init__()
         self.block1 = nn.Sequential(
-            nn.Conv2d(input_shape[0], ndf, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(nci, ndf, kernel_size=3, stride=1, padding=1),
             nn.LeakyReLU(negative_slope=negative_slope, inplace=True),
         )
         self.block2 = nn.Sequential(
@@ -113,32 +114,12 @@ class Discriminator(basemodel.Discriminator):
             nn.BatchNorm2d(ndf * 8),
             nn.LeakyReLU(negative_slope=negative_slope, inplace=True),
         )
-        with torch.no_grad():
-            linear_size = (
-                self.block8(
-                    self.block7(
-                        self.block6(
-                            self.block5(
-                                self.block4(
-                                    self.block3(
-                                        self.block2(
-                                            self.block1(torch.zeros(
-                                                1, *(input_shape)))
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-                .view(1, -1)
-                .size(1)
-            )
         self.block9 = nn.Sequential(
-            nn.Linear(linear_size, 1024),
+            nn.LazyLinear(1024),
             nn.LeakyReLU(negative_slope=negative_slope, inplace=True),
         )
-        self.block10 = nn.Sequential(nn.Linear(1024, 1), nn.Sigmoid())
+        self.block10 = nn.Sequential(nn.Linear(1024, 1), 
+                                        last_activation_fn)
 
     def forward(self, x):
         x = self.block1(x)
