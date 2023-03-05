@@ -17,9 +17,9 @@ class Generator(basemodel.Generator):
     ----------
     scale_factor : int
         The scale factor for the super resolution.
-    nci : int
+    nci : int, default=3
         The number of channels in the input tensor.
-    nco : int
+    nco : int, default=nci
         The number of channels in the output tensor.
     ngf : int, default=64
         The number of filters in the generator.
@@ -29,10 +29,19 @@ class Generator(basemodel.Generator):
     """
 
     def __init__(
-            self, scale_factor, nci=3, nco=3, ngf=64, n_res=5, last_activation_fn=lambda x: (torch.tanh(x) + 1) / 2):
+        self,
+        scale_factor,
+        nci=None,
+        nco=None,
+        ngf=64,
+        n_res=5,
+        last_activation_fn=lambda x: (torch.tanh(x) + 1) / 2,
+    ):
         super(Generator, self).__init__()
         upsample_block_num = int(math.log(scale_factor, 2))
-
+        if nci is None:
+            nci = 3
+            nco = 3
         self.block1 = nn.Sequential(
             nn.Conv2d(nci, ngf, kernel_size=9, padding=4), nn.PReLU()
         )
@@ -118,8 +127,8 @@ class Discriminator(basemodel.Discriminator):
             nn.LazyLinear(1024),
             nn.LeakyReLU(negative_slope=negative_slope, inplace=True),
         )
-        self.block10 = nn.Sequential(nn.Linear(1024, 1), 
-                                        last_activation_fn)
+        self.block10 = nn.Sequential(nn.Linear(1024, 1))
+        self.last_activation_fn = last_activation_fn
 
     def forward(self, x):
         x = self.block1(x)
@@ -133,4 +142,4 @@ class Discriminator(basemodel.Discriminator):
         x = x.view(x.size(0), -1)
         x = self.block9(x)
         x = self.block10(x)
-        return x
+        return self.last_activation_fn(x)
